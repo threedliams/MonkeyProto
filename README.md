@@ -5,6 +5,8 @@ Right now the game is set up to play with 2 controllers. This was tested with PS
 
 To build it you'll need to download [flashdevelop](http://www.flashdevelop.org/) or [haxe](https://haxe.org/download/) and [lime](https://github.com/openfl/lime) and run `lime test [platform]` in the project directory.
 
+Alternatively, plug in 2 controllers and try it [here!](https://threedliams.github.io/pages/assets/games/MonkeyProto/bin/index.html)
+
 ### Controls:
 #### PS4
 - Left stick to move
