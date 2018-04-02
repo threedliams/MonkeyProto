@@ -10,8 +10,12 @@ import flixel.FlxSprite;
 class Bananas extends FlxSprite
 {
 
-	private var spriteWidth = 32;
-	private var spriteHeight = 32;
+	private var spriteWidth:Int = 32;
+	private var spriteHeight:Int = 32;
+	
+	private var lifetime:Float = 0;
+	
+	private var maxLifetime:Float = 30;
 	
 	public function new(?X:Float=0, ?Y:Float=0) {
 		super(X, Y);
@@ -21,8 +25,12 @@ class Bananas extends FlxSprite
 	}
 	
 	override public function update(elapsed:Float):Void {
+		lifetime += elapsed;
 		
 		super.update(elapsed);
 	}
 	
+	public function isReadyToDespawn():Bool {
+		return lifetime >= maxLifetime;
+	}
 }

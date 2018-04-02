@@ -13,15 +13,9 @@ class PoopSprite extends FlxSprite
 		super(X, Y);
 		
 		loadGraphic(AssetPaths.scaledPoop__png, false);
-		//this.width = 16;
-		//this.height = 16;
-		//this.setGraphicSize(16, 16);
 	}
 	
 	override public function update(elapsed:Float):Void {
-		//if (this.x < 0 || this.x > 640 || this.y < 0 || this.y > 480) {
-		//	this.destroy();
-		//}
 		
 		super.update(elapsed);
 	}

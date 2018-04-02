@@ -7,14 +7,13 @@ import flixel.FlxG;
 import flixel.ui.FlxBar;
 import Bananas;
 import flixel.text.FlxText;
+import flixel.math.FlxRandom;
 
 
 class PlayState extends FlxState
 {
 	private var player1:PlayerSprite;
 	private var player2:PlayerSprite;
-	
-	//private var poopTest:PoopSprite;
 	
 	private var walls:FlxTypedGroup<WallSprite>;
 	private var innerWalls:FlxTypedGroup<WallSprite>;
@@ -29,15 +28,35 @@ class PlayState extends FlxState
 	private var player2PoopBar:FlxBar;
 	
 	private var bananas:FlxTypedGroup<Bananas>;
+	private var leftSideBananas:FlxTypedGroup<Bananas>;
+	private var rightSideBananas:FlxTypedGroup<Bananas>;
+	
+	private var nextLeftSpawn:Float = 0;
+	private var nextRightSpawn:Float = 0;
+	
+	private var maxSpawnTime:Float = 60;
+	private var minSpawnTime:Float = 10;
 	
 	private var currentText:FlxText;
 	
 	private var inWinState:Bool;
 	
+	private var randomNumberGenerator:FlxRandom;
+	
+	private var leftSideMinX:Int = 20;
+	private var rightSideMinX:Int = 321;
+	
+	private var leftSideMinY:Int = 20;
+	private var rightSideMinY:Int = 20;
+	
+	private var leftSideMaxX:Int = 282;
+	private var rightSideMaxX:Int = 587;
+	
+	private var leftSideMaxY:Int = 427;
+	private var rightSideMaxY:Int = 427;
+	
 	override public function create():Void
 	{
-		//poopTest = new PoopSprite(100, 100);
-		//add(poopTest);
 		
 		walls = new FlxTypedGroup<WallSprite>();
 		innerWalls = new FlxTypedGroup<WallSprite>();
@@ -91,15 +110,13 @@ class PlayState extends FlxState
 		add(player2PoopBar);
 		
 		bananas = new FlxTypedGroup<Bananas>();
+		leftSideBananas = new FlxTypedGroup<Bananas>();
+		rightSideBananas = new FlxTypedGroup<Bananas>();
 		
-		bananas.add(new Bananas(50, 380));
-		bananas.add(new Bananas(560, 380));
-		
-		for (banana in bananas) {
-			add(banana);
-		}
 		
 		inWinState = false;
+		
+		randomNumberGenerator = new FlxRandom();
 		
 		super.create();
 	}
@@ -116,7 +133,7 @@ class PlayState extends FlxState
 			FlxG.collide(player1, walls);
 			FlxG.collide(player1, dividerWalls);
 			FlxG.overlap(player1, poops, collidePoopWithPlayer);
-			FlxG.overlap(player1, bananas, collidePlayerWithBanana);
+			FlxG.overlap(player1, leftSideBananas, collidePlayerWithBanana);
 		
 			player1HealthBar.value = player1.getHealth();
 			player1PoopBar.value = player1.getPoop();
@@ -138,7 +155,7 @@ class PlayState extends FlxState
 			FlxG.collide(player2, walls);
 			FlxG.collide(player2, dividerWalls);
 			FlxG.overlap(player2, poops, collidePoopWithPlayer);
-			FlxG.overlap(player2, bananas, collidePlayerWithBanana);
+			FlxG.overlap(player2, rightSideBananas, collidePlayerWithBanana);
 			
 			player2HealthBar.value = player2.getHealth();
 			player2PoopBar.value = player2.getPoop();
@@ -157,7 +174,44 @@ class PlayState extends FlxState
 		
 		FlxG.overlap(walls, poops, collidePoopWithWall);
 		
+		updateBananas();
+		
+		nextLeftSpawn -= elapsed;
+		nextRightSpawn -= elapsed;
+		
 		super.update(elapsed);
+	}
+	
+	private function maybeSpawnBanana():Void {
+		if (nextLeftSpawn <= 0 && leftSideBananas.length < 3) {
+			nextLeftSpawn = randomNumberGenerator.float(minSpawnTime, maxSpawnTime);
+			var newBanana:Bananas = new Bananas(randomNumberGenerator.int(leftSideMinX, leftSideMaxX), randomNumberGenerator.int(leftSideMinY, leftSideMaxY));
+			leftSideBananas.add(newBanana);
+			add(newBanana);
+		}
+		if (nextRightSpawn <= 0 && leftSideBananas.length < 3) {
+			nextRightSpawn = randomNumberGenerator.float(minSpawnTime, maxSpawnTime);
+			var newBanana:Bananas = new Bananas(randomNumberGenerator.int(rightSideMinX, rightSideMaxX), randomNumberGenerator.int(rightSideMinY, rightSideMaxY));
+			rightSideBananas.add(newBanana);
+			add(newBanana);
+		}
+	}
+	
+	private function updateBananas():Void {
+		for (banana in leftSideBananas) {
+			if (banana.isReadyToDespawn()) {
+				leftSideBananas.remove(banana, true);
+				banana.destroy();
+			}
+		}
+		for (banana in rightSideBananas) {
+			if (banana.isReadyToDespawn()) {
+				rightSideBananas.remove(banana, true);
+				banana.destroy();
+			}
+		}
+		
+		maybeSpawnBanana();
 	}
 
 	public function addPoop(poop:PoopSprite):Void {
@@ -166,20 +220,15 @@ class PlayState extends FlxState
 	}
 	
 	private function collidePoopWithPlayer(player:PlayerSprite, poop:PoopSprite):Void {
-		//trace(player);
-		//trace(poop);
 		player.setHealth(player.getHealth() - 10);
 		destroyPoop(poop);
 	}
 	
 	private function collidePoopWithWall(wall:WallSprite, poop:PoopSprite):Void {
-		//trace(wall);
-		//trace(poop);
 		destroyPoop(poop);
 	}
 	
 	private function destroyPoop(poop:PoopSprite):Void {
-		//trace(poop);
 		poops.remove(poop, true);
 		poop.destroy();
 	}
